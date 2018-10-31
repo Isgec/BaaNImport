@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "BaaNImport", "BaaNImport\BaaNImport.vbproj", "{3B5063A0-E049-41E0-96E0-16C8BA8A9B96}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "JobProcess", "JobProcess\JobProcess.vbproj", "{14C48360-08A4-430B-A31E-7A675C925010}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3B5063A0-E049-41E0-96E0-16C8BA8A9B96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B5063A0-E049-41E0-96E0-16C8BA8A9B96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B5063A0-E049-41E0-96E0-16C8BA8A9B96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B5063A0-E049-41E0-96E0-16C8BA8A9B96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14C48360-08A4-430B-A31E-7A675C925010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14C48360-08A4-430B-A31E-7A675C925010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14C48360-08A4-430B-A31E-7A675C925010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14C48360-08A4-430B-A31E-7A675C925010}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

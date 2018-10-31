@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConfigFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Folders>
+    <Folder>
+      <JobWorkingPath></JobWorkingPath>
+      <OrgDocPath></OrgDocPath>
+      <xmlPDFslzPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\1</xmlPDFslzPath>
+      <ERPCompany>200</ERPCompany>
+      <ProcessedPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\P</ProcessedPath>
+      <ErrorPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\E</ErrorPath>
+    </Folder>
+<Folder>
+      <JobWorkingPath></JobWorkingPath>
+      <OrgDocPath></OrgDocPath>
+      <xmlPDFslzPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\2</xmlPDFslzPath>
+      <ERPCompany>200</ERPCompany>
+      <ProcessedPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\P</ProcessedPath>
+      <ErrorPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\E</ErrorPath>
+    </Folder>
+<Folder>
+      <JobWorkingPath></JobWorkingPath>
+      <OrgDocPath></OrgDocPath>
+      <xmlPDFslzPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\3</xmlPDFslzPath>
+      <ERPCompany>700</ERPCompany>
+      <ProcessedPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\P</ProcessedPath>
+      <ErrorPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\E</ErrorPath>
+    </Folder>
+  </Folders>
+  <StartupPath />
+  <SerializedAt>C:\Data\Projects15.NET\BaaNImport\BaaNImport\bin\Debug\Settings.xml</SerializedAt>
+  <BaaNLive>1</BaaNLive>
+  <LockXMLFolder>\\192.9.200.121\Boiler\LockUnlock\Lock</LockXMLFolder>
+</ConfigFile>

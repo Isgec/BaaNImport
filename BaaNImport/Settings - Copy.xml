@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ConfigFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Folders>
+    <Folder>
+      <JobWorkingPath></JobWorkingPath>
+      <OrgDocPath>D:\temp\Temp</OrgDocPath>
+      <xmlPDFslzPath>D:\Temp\XML</xmlPDFslzPath>
+      <ERPCompany>200</ERPCompany>
+      <ProcessedPath>D:\Temp\XML\Processed</ProcessedPath>
+      <ErrorPath>D:\Temp\XML\Error</ErrorPath>
+    </Folder>
+  </Folders>
+  <StartupPath />
+  <SerializedAt>C:\Data\Projects15.NET\BaaNImport\BaaNImport\bin\Debug\Settings.xml</SerializedAt>
+  <BaaNLive>1</BaaNLive>
+  <LockXMLFolder>D:\Temp\Lock</LockXMLFolder>
+</ConfigFile>
