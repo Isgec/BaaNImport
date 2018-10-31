@@ -86,34 +86,24 @@ Namespace SIS.EDI
       Return New SIS.EDI.ediASeries()
     End Function
     Public Shared Function GetNextFileName() As String
-      Return "PLM_" & (New Random(Guid.NewGuid().GetHashCode())).Next()
-      Dim Results As String = ""
-      Dim tmp As SIS.EDI.ediASeries = Nothing
+      Dim UniqueFound As Boolean = False
+      Dim tmpNextNo As String = (New Random(Guid.NewGuid().GetHashCode())).Next()
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
-        Using Cmd As SqlCommand = Con.CreateCommand()
-          Cmd.CommandType = CommandType.Text
-          Cmd.CommandText = "select top 1 * from ttcisg131200 where t_acti = 'Y'"
-          Con.Open()
-          Dim Reader As SqlDataReader = Cmd.ExecuteReader()
-          If Reader.Read() Then
-            tmp = New SIS.EDI.ediASeries(Reader)
-          End If
-          Reader.Close()
-        End Using
-      End Using
-      If tmp IsNot Nothing Then
-        tmp.t_rnum += 1
-        Results = tmp.t_seri.Trim & tmp.t_rnum
-        Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
+        Con.Open()
+        Do While Not UniqueFound
           Using Cmd As SqlCommand = Con.CreateCommand()
             Cmd.CommandType = CommandType.Text
-            Cmd.CommandText = "update ttcisg131200 set t_rnum = " & tmp.t_rnum & " where t_seri = '" & tmp.t_seri & "'"
-            Con.Open()
-            Cmd.ExecuteNonQuery()
+            Cmd.CommandText = "select isnull(count(*),0) from ttcisg132200 where t_drid = '" & tmpNextNo & "'"
+            Dim cnt As Integer = Cmd.ExecuteScalar()
+            If cnt = 0 Then
+              UniqueFound = True
+              Exit Do
+            End If
+            tmpNextNo = (New Random(Guid.NewGuid().GetHashCode())).Next()
           End Using
-        End Using
-      End If
-      Return Results
+        Loop
+      End Using
+      Return tmpNextNo
     End Function
     Public Shared Function GetActiveSeries() As SIS.EDI.ediASeries
       Dim Results As SIS.EDI.ediASeries = Nothing

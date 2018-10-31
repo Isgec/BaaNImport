@@ -268,9 +268,23 @@ Namespace SIS.DMISG
           .t_qnty = 0
         End Try
         Try
+          If Convert.ToDecimal(t.p_qty) < 0 Then
+            Throw New Exception("Part Item Quantity is Negative.")
+          End If
+        Catch ex As Exception
+
+        End Try
+        Try
           .t_wght = t.p_wt
         Catch ex As Exception
           .t_wght = 0
+        End Try
+        Try
+          If Convert.ToDecimal(t.p_wt) < 0 Then
+            Throw New Exception("Part Item Weight is Negative.")
+          End If
+        Catch ex As Exception
+
         End Try
         .t_spec = t.spec
         .t_size = t.size
@@ -278,7 +292,6 @@ Namespace SIS.DMISG
         .t_Refcntd = 0
         .t_Refcntu = 0
         .t_mcod = ""
-
       End With
       Return tmp
     End Function

@@ -666,6 +666,12 @@ Namespace SIS.DMISG
         Catch ex As Exception
           .t_wght = 0.00
         End Try
+        Try
+          If Convert.ToDecimal(t.weight) < 0 Then
+            Throw New Exception("Weight is negative.")
+          End If
+        Catch ex As Exception
+        End Try
         .t_scal = t.scale
         .t_size = t.sheetsize
         .t_pdfn = t.PDF_filename

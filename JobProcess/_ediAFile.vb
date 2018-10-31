@@ -241,7 +241,7 @@ Namespace SIS.EDI
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.StoredProcedure
-          Cmd.CommandText = "spediAFileInsert"
+          Cmd.CommandText = "spedi_LG_AFileInsert"
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@t_dcid", SqlDbType.VarChar, 201, Record.t_dcid)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@t_hndl", SqlDbType.VarChar, 201, Record.t_hndl)
           SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@t_indx", SqlDbType.VarChar, 51, Record.t_indx)
@@ -310,7 +310,7 @@ Namespace SIS.EDI
       Using Con As SqlConnection = New SqlConnection(SIS.SYS.SQLDatabase.DBCommon.GetBaaNConnectionString())
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text
-          Cmd.CommandText = "delete ttcisg132200 where t_drid=" & Record.t_drid
+          Cmd.CommandText = "delete ttcisg132200 where t_drid='" & Record.t_drid & "'"
           Con.Open()
           Cmd.ExecuteNonQuery()
         End Using

@@ -215,9 +215,22 @@ Namespace SIS.DMISG
           .t_qnty = 0
         End Try
         Try
+          If Convert.ToDecimal(t.it_qty) < 0 Then
+            Throw New Exception("Item Quantity is Negative.")
+          End If
+        Catch ex As Exception
+        End Try
+        Try
           .t_wght = t.it_wt
         Catch ex As Exception
           .t_wght = 0
+        End Try
+        Try
+          If Convert.ToDecimal(t.it_wt) < 0 Then
+            Throw New Exception("Item Weight is Negative.")
+          End If
+        Catch ex As Exception
+
         End Try
         .t_itmt = t.t
         .t_txta = 0

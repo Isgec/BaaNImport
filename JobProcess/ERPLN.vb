@@ -4,29 +4,6 @@
   Public Shared Function InsertUpdateInERPLN(ByVal t As vaultXML, Optional ByVal msg As showMsg = Nothing) As Boolean
     Dim mRet As Boolean = True
     Dim dmDoc As SIS.DMISG.dmisg121 = Nothing
-    'If Not SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
-    '  SIS.DMISG.dmisg001.dmisg001DeleteAll(t.drgid, t.rev, t.ERPCompany)
-    '  Dim tmp As SIS.EDI.ediAFile = SIS.EDI.ediAFile.ediAFileGetByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
-    '  If tmp IsNot Nothing Then
-    '    Try
-    '      If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
-    '        IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
-    '      End If
-    '    Catch ex As Exception
-    '    End Try
-    '    SIS.EDI.ediAFile.ediAFileDelete(tmp)
-    '  End If
-    '  tmp = SIS.EDI.ediAFile.ediAFileGetByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
-    '  If tmp IsNot Nothing Then
-    '    Try
-    '      If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
-    '        IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
-    '      End If
-    '    Catch ex As Exception
-    '    End Try
-    '    SIS.EDI.ediAFile.ediAFileDelete(tmp)
-    '  End If
-    'End If
     If t.rev = "00" Then
       Dim tmpDoc As SIS.DMISG.dmisg001 = SIS.DMISG.dmisg001.dmisg001GetByID(t.drgid, t.rev, t.ERPCompany)
       If tmpDoc IsNot Nothing Then
@@ -82,11 +59,7 @@
         '3. Ref Dwg
         For Each doc As vaultXML.RefDoc In t.RefDocs
           Dim refD As SIS.DMISG.dmisg003 = SIS.DMISG.dmisg003.Getdmisg003(doc, t)
-          Try
-            refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
-          Catch ex As Exception
-            msg(ex.Message)
-          End Try
+          refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
         Next
         '5. Master Document List
         dmDoc = SIS.DMISG.dmisg121.Getdmisg121(t)
@@ -166,11 +139,7 @@
         '3. Ref Dwg
         For Each doc As vaultXML.RefDoc In t.RefDocs
           Dim refD As SIS.DMISG.dmisg003 = SIS.DMISG.dmisg003.Getdmisg003(doc, t)
-          Try
-            refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
-          Catch ex As Exception
-            msg(ex.Message)
-          End Try
+          refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
         Next
         '5. Master Document List
         dmDoc = SIS.DMISG.dmisg121.Getdmisg121(t)
