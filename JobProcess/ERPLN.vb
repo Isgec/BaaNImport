@@ -1,6 +1,5 @@
 ﻿Public Class ERPLN
   Public Delegate Sub showMsg(ByVal str As String)
-
   Public Shared Function InsertUpdateInERPLN(ByVal t As vaultXML, Optional ByVal msg As showMsg = Nothing) As Boolean
     Dim mRet As Boolean = True
     Dim dmDoc As SIS.DMISG.dmisg121 = Nothing
@@ -59,7 +58,11 @@
         '3. Ref Dwg
         For Each doc As vaultXML.RefDoc In t.RefDocs
           Dim refD As SIS.DMISG.dmisg003 = SIS.DMISG.dmisg003.Getdmisg003(doc, t)
-          refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
+          Try
+            refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
+          Catch ex As Exception
+            If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message)
+          End Try
         Next
         '5. Master Document List
         dmDoc = SIS.DMISG.dmisg121.Getdmisg121(t)
@@ -139,7 +142,11 @@
         '3. Ref Dwg
         For Each doc As vaultXML.RefDoc In t.RefDocs
           Dim refD As SIS.DMISG.dmisg003 = SIS.DMISG.dmisg003.Getdmisg003(doc, t)
-          refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
+          Try
+            refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
+          Catch ex As Exception
+            If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message)
+          End Try
         Next
         '5. Master Document List
         dmDoc = SIS.DMISG.dmisg121.Getdmisg121(t)
