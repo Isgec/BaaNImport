@@ -536,7 +536,12 @@ Namespace SIS.DMISG
           Case "EPC"
             div = "EU210"
           Case "PC"
-            div = "EU220"
+            Select Case t.contract.Substring(0, 2).ToUpper
+              Case "FS", "FG"
+                div = "EU250"
+              Case Else
+                div = "EU220"
+            End Select
           Case "APC"
             div = "EU240"
         End Select
