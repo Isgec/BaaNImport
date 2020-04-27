@@ -43,8 +43,9 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EDICommon">
-      <HintPath>..\..\BomExportEDI\EDICommon\bin\Debug\EDICommon.dll</HintPath>
+    <Reference Include="ejiVault, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\ejiVault\ejiVault\bin\Debug\ejiVault.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -90,13 +91,12 @@
     <Compile Include="TimerSupport.vb" />
     <Compile Include="vaultXML.vb" />
     <Compile Include="_dmisg001.vb" />
+    <Compile Include="_dmisg022.vb" />
+    <Compile Include="_dmisg021.vb" />
     <Compile Include="_dmisg002.vb" />
     <Compile Include="_dmisg003.vb" />
     <Compile Include="_dmisg004.vb" />
     <Compile Include="_dmisg121.vb" />
-    <Compile Include="_ediAFile.vb" />
-    <Compile Include="_ediALib.vb" />
-    <Compile Include="_ediASeries.vb" />
     <Compile Include="_Enums.vb" />
   </ItemGroup>
   <ItemGroup>

@@ -4,30 +4,16 @@
     <Folder>
       <JobWorkingPath></JobWorkingPath>
       <OrgDocPath></OrgDocPath>
-      <xmlPDFslzPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\1</xmlPDFslzPath>
+      <xmlPDFslzPath>D:\Temp</xmlPDFslzPath>
       <ERPCompany>200</ERPCompany>
-      <ProcessedPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\P</ProcessedPath>
-      <ErrorPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\E</ErrorPath>
-    </Folder>
-<Folder>
-      <JobWorkingPath></JobWorkingPath>
-      <OrgDocPath></OrgDocPath>
-      <xmlPDFslzPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\2</xmlPDFslzPath>
-      <ERPCompany>200</ERPCompany>
-      <ProcessedPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\P</ProcessedPath>
-      <ErrorPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\E</ErrorPath>
-    </Folder>
-<Folder>
-      <JobWorkingPath></JobWorkingPath>
-      <OrgDocPath></OrgDocPath>
-      <xmlPDFslzPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\3</xmlPDFslzPath>
-      <ERPCompany>700</ERPCompany>
-      <ProcessedPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\P</ProcessedPath>
-      <ErrorPath>\\192.9.200.119\VaultIntegration\EDIOutput\XML\E</ErrorPath>
+      <ProcessedPath>D:\Temp\P</ProcessedPath>
+      <ErrorPath>D:\Temp\E</ErrorPath>
     </Folder>
   </Folders>
   <StartupPath />
   <SerializedAt>C:\Data\Projects15.NET\BaaNImport\BaaNImport\bin\Debug\Settings.xml</SerializedAt>
   <BaaNLive>1</BaaNLive>
-  <LockXMLFolder>\\192.9.200.121\Boiler\LockUnlock\Lock</LockXMLFolder>
+  <LockXMLFolder>D:\Temp\L</LockXMLFolder>
+  <IsLocalISGECVault>0</IsLocalISGECVault>
+  <ISGECVaultIP>192.9.200.146</ISGECVaultIP>
 </ConfigFile>

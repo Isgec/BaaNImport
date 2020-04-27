@@ -810,6 +810,12 @@ Namespace SIS.DMISG
           Cmd.CommandText = "DELETE tdmisg004" & comp & " where t_docn='" & t_docn & "' and t_revn='" & t_revn & "'"
           Cmd.ExecuteNonQuery()
         End Using
+        'Type R-Item
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "DELETE tdmisg022" & comp & " where t_docn='" & t_docn & "' and t_revn='" & t_revn & "'"
+          Cmd.ExecuteNonQuery()
+        End Using
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text
           Cmd.CommandText = "DELETE tdmisg003" & comp & " where t_docn='" & t_docn & "' and t_revn='" & t_revn & "'"
@@ -825,6 +831,20 @@ Namespace SIS.DMISG
         Using Cmd As SqlCommand = Con.CreateCommand()
           Cmd.CommandType = CommandType.Text
           Cmd.CommandText = "DELETE tdmisg002" & comp & " where t_docn='" & t_docn & "' and t_revn='" & t_revn & "'"
+          Cmd.ExecuteNonQuery()
+        End Using
+        'Type R-Item
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.StoredProcedure
+          Cmd.CommandText = "spdmisg021" & comp & "DeleteText"
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@t_docn", SqlDbType.VarChar, 33, t_docn)
+          SIS.SYS.SQLDatabase.DBCommon.AddDBParameter(Cmd, "@t_revn", SqlDbType.VarChar, 21, t_revn)
+          Cmd.ExecuteNonQuery()
+        End Using
+        'Type R-Item
+        Using Cmd As SqlCommand = Con.CreateCommand()
+          Cmd.CommandType = CommandType.Text
+          Cmd.CommandText = "DELETE tdmisg021" & comp & " where t_docn='" & t_docn & "' and t_revn='" & t_revn & "'"
           Cmd.ExecuteNonQuery()
         End Using
         Using Cmd As SqlCommand = Con.CreateCommand()

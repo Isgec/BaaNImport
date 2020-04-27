@@ -544,9 +544,16 @@ Namespace SIS.DMISG
             End Select
           Case "APC"
             div = "EU240"
+          Case "ISGEC REDECAM"
+            div = "EU700"
+          Case "ISGEC COVEMA"
+            div = "EU651"
         End Select
         If t.ERPCompany = "700" Then
           div = "EU700"
+        End If
+        If t.ERPCompany = "651" Then
+          div = "EU651"
         End If
         .t_eunt = div
         Select Case t.sheetsize

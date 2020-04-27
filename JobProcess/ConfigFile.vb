@@ -21,6 +21,9 @@ Public Class ConfigFile
   Public Property SerializedAt As String = ""
   Public Property BaaNLive As Boolean = False
   Public Property LockXMLFolder As String = ""
+  Public Property IsLocalISGECVault As Boolean = False
+  Public Property ISGECVaultIP As String = ""
+
   Public Shared Function Serialize(ByVal jpConfig As ConfigFile, ByVal SerializeAt As String) As ConfigFile
     jpConfig.SerializedAt = SerializeAt
     Dim oSrz As XmlSerializer = New XmlSerializer(jpConfig.GetType)

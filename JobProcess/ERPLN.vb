@@ -1,4 +1,5 @@
-﻿Public Class ERPLN
+﻿Imports ejiVault
+Public Class ERPLN
   Public Delegate Sub showMsg(ByVal str As String)
   Public Shared Function InsertUpdateInERPLN(ByVal t As vaultXML, Optional ByVal msg As showMsg = Nothing) As Boolean
     Dim mRet As Boolean = True
@@ -12,25 +13,41 @@
         SIS.DMISG.dmisg001.dmisg001DeleteAll(t.drgid, t.rev, t.ERPCompany)
         '===Physical File Delete only when ERP is LIVE
         If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
-          Dim tmp As SIS.EDI.ediAFile = SIS.EDI.ediAFile.ediAFileGetByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
+          Dim tmp As EJI.ediAFile = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
           If tmp IsNot Nothing Then
+            If t.LibraryID <> tmp.t_lbcd Then
+              Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
+              t.LibraryID = tmpL.t_lbcd
+              t.LibraryPath = tmpL.LibraryPath
+              If Not EJI.DBCommon.IsLocalISGECVault Then
+                EJI.ediALib.ConnectISGECVault(tmpL)
+              End If
+            End If
             Try
               If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
                 IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
               End If
             Catch ex As Exception
             End Try
-            SIS.EDI.ediAFile.ediAFileDelete(tmp)
+            EJI.ediAFile.DeleteData(tmp)
           End If
-          tmp = SIS.EDI.ediAFile.ediAFileGetByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
+          tmp = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
           If tmp IsNot Nothing Then
+            If t.LibraryID <> tmp.t_lbcd Then
+              Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
+              t.LibraryID = tmpL.t_lbcd
+              t.LibraryPath = tmpL.LibraryPath
+              If Not EJI.DBCommon.IsLocalISGECVault Then
+                EJI.ediALib.ConnectISGECVault(tmpL)
+              End If
+            End If
             Try
               If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
                 IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
               End If
             Catch ex As Exception
             End Try
-            SIS.EDI.ediAFile.ediAFileDelete(tmp)
+            EJI.ediAFile.DeleteData(tmp)
           End If
         End If
         '===Physical File Handling
@@ -41,21 +58,37 @@
         tmpDoc = SIS.DMISG.dmisg001.InsertData(tmpDoc, t.ERPCompany)
         '2. Item & 4 Part Item
         Dim tmpCnt As Integer = 0
+        Dim refCnt As Integer = 0
         Dim pCnt As Integer = 0
         Dim pItem As String = ""
         For Each itm As vaultXML.Item In t.Items
-          tmpCnt += 1
           pCnt = 0
-          Dim tmpItm As SIS.DMISG.dmisg002 = SIS.DMISG.dmisg002.Getdmisg002(itm, t, tmpCnt)
-          tmpItm = SIS.DMISG.dmisg002.InsertData(tmpItm, t.ERPCompany)
-          pItem = itm.item_code
-          For Each pItm As vaultXML.Part In itm.Parts
-            pCnt += 1
-            Dim tmpPitm As SIS.DMISG.dmisg004 = SIS.DMISG.dmisg004.Getdmisg004(pItm, t, tmpCnt, pCnt, pItem)
-            tmpPitm = SIS.DMISG.dmisg004.InsertData(tmpPitm, t.ERPCompany)
-          Next
+          Select Case itm.t.ToUpper
+            Case "R"
+              refCnt += 1
+              Dim refItm As SIS.DMISG.dmisg021 = SIS.DMISG.dmisg021.Getdmisg021(itm, t, refCnt)
+              refItm = SIS.DMISG.dmisg021.InsertData(refItm, t.ERPCompany)
+              pItem = itm.item_code
+              '3. Part Item
+              For Each pItm As vaultXML.Part In itm.Parts
+                pCnt += 1
+                Dim refPitm As SIS.DMISG.dmisg022 = SIS.DMISG.dmisg022.Getdmisg022(pItm, t, refCnt, pCnt, pItem)
+                refPitm = SIS.DMISG.dmisg022.InsertData(refPitm, t.ERPCompany)
+              Next
+            Case Else
+              tmpCnt += 1
+              Dim tmpItm As SIS.DMISG.dmisg002 = SIS.DMISG.dmisg002.Getdmisg002(itm, t, tmpCnt)
+              tmpItm = SIS.DMISG.dmisg002.InsertData(tmpItm, t.ERPCompany)
+              pItem = itm.item_code
+              '3. Part Item
+              For Each pItm As vaultXML.Part In itm.Parts
+                pCnt += 1
+                Dim tmpPitm As SIS.DMISG.dmisg004 = SIS.DMISG.dmisg004.Getdmisg004(pItm, t, tmpCnt, pCnt, pItem)
+                tmpPitm = SIS.DMISG.dmisg004.InsertData(tmpPitm, t.ERPCompany)
+              Next
+          End Select
         Next
-        '3. Ref Dwg
+        '4. Ref Dwg
         For Each doc As vaultXML.RefDoc In t.RefDocs
           Dim refD As SIS.DMISG.dmisg003 = SIS.DMISG.dmisg003.Getdmisg003(doc, t)
           Try
@@ -102,19 +135,35 @@
         SIS.DMISG.dmisg001.dmisg001DeleteAll(t.drgid, t.rev, t.ERPCompany)
         '==========Physical File Delete When ERP is Live Handling============
         If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
-          Dim tmp As SIS.EDI.ediAFile = SIS.EDI.ediAFile.ediAFileGetByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
+          Dim tmp As EJI.ediAFile = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
           If tmp IsNot Nothing Then
+            If t.LibraryID <> tmp.t_lbcd Then
+              Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
+              t.LibraryID = tmpL.t_lbcd
+              t.LibraryPath = tmpL.LibraryPath
+              If Not EJI.DBCommon.IsLocalISGECVault Then
+                EJI.ediALib.ConnectISGECVault(tmpL)
+              End If
+            End If
             If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
               IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
             End If
-            SIS.EDI.ediAFile.ediAFileDelete(tmp)
+            EJI.ediAFile.DeleteData(tmp)
           End If
-          tmp = SIS.EDI.ediAFile.ediAFileGetByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
+          tmp = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
           If tmp IsNot Nothing Then
+            If t.LibraryID <> tmp.t_lbcd Then
+              Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
+              t.LibraryID = tmpL.t_lbcd
+              t.LibraryPath = tmpL.LibraryPath
+              If Not EJI.DBCommon.IsLocalISGECVault Then
+                EJI.ediALib.ConnectISGECVault(tmpL)
+              End If
+            End If
             If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
               IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
             End If
-            SIS.EDI.ediAFile.ediAFileDelete(tmp)
+            EJI.ediAFile.DeleteData(tmp)
           End If
         End If
         '================Physical File Handling==========================
@@ -125,19 +174,33 @@
         tmpDoc = SIS.DMISG.dmisg001.InsertData(tmpDoc, t.ERPCompany)
         '2. Item & 4 Part Item
         Dim tmpCnt As Integer = 0
+        Dim refCnt As Integer = 0
         Dim pCnt As Integer = 0
         Dim pItem As String = ""
         For Each itm As vaultXML.Item In t.Items
-          tmpCnt += 1
-          Dim tmpItm As SIS.DMISG.dmisg002 = SIS.DMISG.dmisg002.Getdmisg002(itm, t, tmpCnt)
-          tmpItm = SIS.DMISG.dmisg002.InsertData(tmpItm, t.ERPCompany)
           pCnt = 0
-          pItem = itm.item_code
-          For Each pItm As vaultXML.Part In itm.Parts
-            pCnt += 1
-            Dim tmpPitm As SIS.DMISG.dmisg004 = SIS.DMISG.dmisg004.Getdmisg004(pItm, t, tmpCnt, pCnt, pItem)
-            tmpPitm = SIS.DMISG.dmisg004.InsertData(tmpPitm, t.ERPCompany)
-          Next
+          Select Case itm.t.ToUpper
+            Case "R"
+              refCnt += 1
+              Dim refItm As SIS.DMISG.dmisg021 = SIS.DMISG.dmisg021.Getdmisg021(itm, t, refCnt)
+              refItm = SIS.DMISG.dmisg021.InsertData(refItm, t.ERPCompany)
+              pItem = itm.item_code
+              For Each pItm As vaultXML.Part In itm.Parts
+                pCnt += 1
+                Dim refPitm As SIS.DMISG.dmisg022 = SIS.DMISG.dmisg022.Getdmisg022(pItm, t, refCnt, pCnt, pItem)
+                refPitm = SIS.DMISG.dmisg022.InsertData(refPitm, t.ERPCompany)
+              Next
+            Case Else
+              tmpCnt += 1
+              Dim tmpItm As SIS.DMISG.dmisg002 = SIS.DMISG.dmisg002.Getdmisg002(itm, t, tmpCnt)
+              tmpItm = SIS.DMISG.dmisg002.InsertData(tmpItm, t.ERPCompany)
+              pItem = itm.item_code
+              For Each pItm As vaultXML.Part In itm.Parts
+                pCnt += 1
+                Dim tmpPitm As SIS.DMISG.dmisg004 = SIS.DMISG.dmisg004.Getdmisg004(pItm, t, tmpCnt, pCnt, pItem)
+                tmpPitm = SIS.DMISG.dmisg004.InsertData(tmpPitm, t.ERPCompany)
+              Next
+          End Select
         Next
         '3. Ref Dwg
         For Each doc As vaultXML.RefDoc In t.RefDocs
@@ -160,34 +223,43 @@
     Return mRet
   End Function
   Public Shared Function UploadInISGECVault(ByVal t As vaultXML, Optional ByVal msg As showMsg = Nothing) As Boolean
+    Dim tmpL As EJI.ediALib = EJI.ediALib.GetActiveLibrary
+    If t.LibraryID <> tmpL.t_lbcd Then
+      t.LibraryID = tmpL.t_lbcd
+      t.LibraryPath = tmpL.LibraryPath
+      If Not EJI.DBCommon.IsLocalISGECVault Then
+        EJI.ediALib.ConnectISGECVault(tmpL)
+      End If
+    End If
     If IO.File.Exists(t.PDFFilePathName) Then
       Dim LibFileName As String = ""
       Dim Found As Boolean = True
       '1. Check PDF Attachment Found
-      Dim tmp As SIS.EDI.ediAFile = SIS.EDI.ediAFile.ediAFileGetByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
+      Dim tmp As EJI.ediAFile = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
       If tmp Is Nothing Then
         Found = False
-        tmp = New SIS.EDI.ediAFile
-        LibFileName = SIS.EDI.ediASeries.GetNextFileName
+        tmp = New EJI.ediAFile
+        LibFileName = EJI.ediASeries.GetNextFileID
       Else
         LibFileName = tmp.t_dcid
       End If
       With tmp
+        .t_drid = EJI.ediASeries.GetNextRecordID
         .t_dcid = LibFileName
         .t_hndl = "DOCUMENTMASTERPDF_" & t.ERPCompany
         .t_indx = t.AttachmentIndex
-        .t_prcd = "By EDI"
+        .t_prcd = "EJIMAIN"
         .t_fnam = IO.Path.GetFileName(t.PDFFilePathName)
         .t_lbcd = t.LibraryID
         .t_atby = t.VaultUserName
-        .t_aton = Now
+        .t_aton = Now.ToString("dd/MM/yyyy")
         .t_Refcntd = 0
         .t_Refcntu = 0
       End With
       If Not Found Then
-        tmp = SIS.EDI.ediAFile.InsertData(tmp)
+        tmp = EJI.ediAFile.InsertData(tmp)
       Else
-        tmp = SIS.EDI.ediAFile.UpdateData(tmp)
+        tmp = EJI.ediAFile.UpdateData(tmp)
       End If
       If msg IsNot Nothing Then
         msg.Invoke("PDF Handle: " & tmp.t_fnam)
@@ -212,30 +284,31 @@
       Dim LibFileName As String = ""
       Dim Found As Boolean = True
       '1. Check ORG Attachment Found
-      Dim tmp As SIS.EDI.ediAFile = SIS.EDI.ediAFile.ediAFileGetByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
+      Dim tmp As EJI.ediAFile = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
       If tmp Is Nothing Then
         Found = False
-        tmp = New SIS.EDI.ediAFile
-        LibFileName = SIS.EDI.ediASeries.GetNextFileName
+        tmp = New EJI.ediAFile
+        LibFileName = EJI.ediASeries.GetNextFileID
       Else
         LibFileName = tmp.t_dcid
       End If
       With tmp
+        .t_drid = EJI.ediASeries.GetNextRecordID
         .t_dcid = LibFileName
         .t_hndl = "DOCUMENTMASTERORG_" & t.ERPCompany
         .t_indx = t.AttachmentIndex
-        .t_prcd = "By EDI"
+        .t_prcd = "EJIMAIN"
         .t_fnam = IO.Path.GetFileName(t.ORGFilePathName)
         .t_lbcd = t.LibraryID
         .t_atby = t.VaultUserName
-        .t_aton = Now
+        .t_aton = Now.ToString("dd/MM/yyyy")
         .t_Refcntd = 0
         .t_Refcntu = 0
       End With
       If Not Found Then
-        tmp = SIS.EDI.ediAFile.InsertData(tmp)
+        tmp = EJI.ediAFile.InsertData(tmp)
       Else
-        tmp = SIS.EDI.ediAFile.UpdateData(tmp)
+        tmp = EJI.ediAFile.UpdateData(tmp)
       End If
       If msg IsNot Nothing Then
         msg.Invoke("ORG Handle: " & tmp.t_fnam)
@@ -257,5 +330,4 @@
     End If
     Return True
   End Function
-
 End Class

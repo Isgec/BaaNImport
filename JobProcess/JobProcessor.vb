@@ -1,7 +1,7 @@
 ﻿Imports System.Reflection
 Imports System.Xml
 Imports System.Xml.Serialization
-
+Imports ejiVault
 Public Class JobProcessor
   Inherits TimerSupport
   Implements IDisposable
@@ -38,8 +38,11 @@ Public Class JobProcessor
             tmpXml.PDFFilePathName = IO.Path.ChangeExtension(XmlFile, "PDF")
             tmpXml.slzFileName = IO.Path.ChangeExtension(XmlFile, "slz")
             tmpXml.ERPCompany = tmpFld.ERPCompany
-            tmpXml.LibraryID = LibraryID
-            tmpXml.LibraryPath = LibraryPath
+            EJI.DBCommon.ERPCompany = tmpFld.ERPCompany
+            '
+            'tmpXml.LibraryID = LibraryID
+            'tmpXml.LibraryPath = LibraryPath
+            '
             If ERPLN.InsertUpdateInERPLN(tmpXml, AddressOf Msg) Then
               If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
                 Msg("Attaching: " & IO.Path.GetFileName(XmlFile))
@@ -230,11 +233,17 @@ Public Class JobProcessor
         End If
       Next
       SIS.SYS.SQLDatabase.DBCommon.BaaNLive = jpConfig.BaaNLive
-      Dim tmpL As SIS.EDI.ediALib = SIS.EDI.ediALib.GetActiveLibrary
-      LibraryPath = "\\192.9.200.146\" & tmpL.t_path
+
+      EJI.DBCommon.BaaNLive = jpConfig.BaaNLive
+      EJI.DBCommon.ERPCompany = "200"
+      EJI.DBCommon.IsLocalISGECVault = jpConfig.IsLocalISGECVault
+      EJI.DBCommon.ISGECVaultIP = jpConfig.ISGECVaultIP
+
+      Dim tmpL As EJI.ediALib = EJI.ediALib.GetActiveLibrary
+      LibraryPath = tmpL.LibraryPath
       LibraryID = tmpL.t_lbcd
-      If ConnectToNetworkFunctions.connectToNetwork(LibraryPath, "X:", "administrator", "Indian@12345") Then
-        RemoteLibraryConnected = True
+      If Not jpConfig.IsLocalISGECVault Then
+        RemoteLibraryConnected = EJI.ediALib.ConnectISGECVault(tmpL)
       End If
     Catch ex As Exception
       StopJob()
@@ -244,7 +253,7 @@ Public Class JobProcessor
 
   Public Overrides Sub Stopped()
     If RemoteLibraryConnected Then
-      ConnectToNetworkFunctions.disconnectFromNetwork("X:")
+      EJI.ediALib.DisconnectISGECVault()
       RemoteLibraryConnected = False
     End If
     jpConfig = Nothing
