@@ -1,7 +1,7 @@
 ﻿Imports ejiVault
 Public Class ERPLN
-  Public Delegate Sub showMsg(ByVal str As String)
-  Public Shared Function InsertUpdateInERPLN(ByVal t As vaultXML, Optional ByVal msg As showMsg = Nothing) As Boolean
+  Public Delegate Sub showMsg(ByVal str As String, x As SIS.LOG.logBaaNTransfer)
+  Public Shared Function InsertUpdateInERPLN(ByVal t As vaultXML, log As SIS.LOG.logBaaNTransfer, Optional ByVal msg As showMsg = Nothing) As Boolean
     Dim mRet As Boolean = True
     Dim dmDoc As SIS.DMISG.dmisg121 = Nothing
     If t.rev = "00" Then
@@ -94,7 +94,7 @@ Public Class ERPLN
           Try
             refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
           Catch ex As Exception
-            If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message)
+            If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message, log)
           End Try
         Next
         '5. Master Document List
@@ -208,7 +208,7 @@ Public Class ERPLN
           Try
             refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
           Catch ex As Exception
-            If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message)
+            If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message, log)
           End Try
         Next
         '5. Master Document List
@@ -222,7 +222,7 @@ Public Class ERPLN
     End If
     Return mRet
   End Function
-  Public Shared Function UploadInISGECVault(ByVal t As vaultXML, Optional ByVal msg As showMsg = Nothing) As Boolean
+  Public Shared Function UploadInISGECVault(ByVal t As vaultXML, log As SIS.LOG.logBaaNTransfer, Optional ByVal msg As showMsg = Nothing) As Boolean
     Dim tmpL As EJI.ediALib = EJI.ediALib.GetActiveLibrary
     If t.LibraryID <> tmpL.t_lbcd Then
       t.LibraryID = tmpL.t_lbcd
@@ -262,7 +262,7 @@ Public Class ERPLN
         tmp = EJI.ediAFile.UpdateData(tmp)
       End If
       If msg IsNot Nothing Then
-        msg.Invoke("PDF Handle: " & tmp.t_fnam)
+        msg.Invoke("PDF Handle: " & tmp.t_fnam, log)
       End If
       Try
         '2. Move & Overwrite File
@@ -271,11 +271,11 @@ Public Class ERPLN
         End If
         IO.File.Copy(t.PDFFilePathName, t.LibraryPath & "\" & LibFileName)
         If msg IsNot Nothing Then
-          msg.Invoke("PDF Copied: " & tmp.t_fnam)
+          msg.Invoke("PDF Copied: " & tmp.t_fnam, log)
         End If
       Catch ex As Exception
         If msg IsNot Nothing Then
-          msg.Invoke("Error Copying PDF: " & tmp.t_fnam)
+          msg.Invoke("Error Copying PDF: " & tmp.t_fnam, log)
         End If
       End Try
     End If
@@ -311,7 +311,7 @@ Public Class ERPLN
         tmp = EJI.ediAFile.UpdateData(tmp)
       End If
       If msg IsNot Nothing Then
-        msg.Invoke("ORG Handle: " & tmp.t_fnam)
+        msg.Invoke("ORG Handle: " & tmp.t_fnam, log)
       End If
       Try
         '2. Move & Overwrite File
@@ -320,11 +320,11 @@ Public Class ERPLN
         End If
         IO.File.Move(t.ORGFilePathName, t.LibraryPath & "\" & LibFileName)
         If msg IsNot Nothing Then
-          msg.Invoke("ORG Copied: " & tmp.t_fnam)
+          msg.Invoke("ORG Copied: " & tmp.t_fnam, log)
         End If
       Catch ex As Exception
         If msg IsNot Nothing Then
-          msg.Invoke("Error Copying ORG: " & tmp.t_fnam)
+          msg.Invoke("Error Copying ORG: " & tmp.t_fnam, log)
         End If
       End Try
     End If

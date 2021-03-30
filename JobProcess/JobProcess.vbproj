@@ -71,6 +71,7 @@
     <Compile Include="ConfigFile.vb" />
     <Compile Include="ERPLN.vb" />
     <Compile Include="JobProcessor.vb" />
+    <Compile Include="logBaaNTransfer.vb" />
     <Compile Include="mapDrive.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">

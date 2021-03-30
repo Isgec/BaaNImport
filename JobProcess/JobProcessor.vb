@@ -17,37 +17,66 @@ Public Class JobProcessor
   Public Event Log(ByVal Message As String)
   Public Event Err(ByVal Message As String)
 
-  Public Sub Msg(ByVal str As String)
+  Public Sub Msg(ByVal str As String, x As SIS.LOG.logBaaNTransfer)
+    If x IsNot Nothing Then
+      x.StepError = str
+      SIS.LOG.logBaaNTransfer.InsertData(x)
+    Else
+      Dim log As New SIS.LOG.logBaaNTransfer()
+      log.StepError = str
+      SIS.LOG.logBaaNTransfer.InsertData(log)
+    End If
     RaiseEvent Log(str)
   End Sub
-  Public Sub MsgErr(ByVal str As String)
+
+  Public Sub MsgErr(ByVal str As String, x As SIS.LOG.logBaaNTransfer)
+    If x IsNot Nothing Then
+      x.StepError = str
+      SIS.LOG.logBaaNTransfer.InsertData(x)
+    Else
+      Dim log As New SIS.LOG.logBaaNTransfer()
+      log.StepError = str
+      SIS.LOG.logBaaNTransfer.InsertData(log)
+    End If
     RaiseEvent Err(str)
   End Sub
   Public Overrides Sub Process()
+    Dim log As SIS.LOG.logBaaNTransfer = Nothing
     Try
       For Each tmpFld As ConfigFile.Folder In jpConfig.Folders
         Dim Xmls() As String = IO.Directory.GetFiles(tmpFld.xmlPDFslzPath, "*.xml", IO.SearchOption.TopDirectoryOnly)
         If Xmls.Length > 0 Then
-          Msg("Files: " & Xmls.Length & " In Folder: " & tmpFld.xmlPDFslzPath)
+          Msg("Files: " & Xmls.Length & " In Folder: " & tmpFld.xmlPDFslzPath, Nothing)
         End If
         For Each XmlFile As String In Xmls
+
           Dim tmpXml As vaultXML = Nothing
           Try
-            Msg("Importing: " & IO.Path.GetFileName(XmlFile))
             tmpXml = vaultXML.GetVaultXML(XmlFile)
+            log = New SIS.LOG.logBaaNTransfer()
+            With log
+              .CreatedOn = Now
+              .JobFileName = XmlFile
+              .Job_CreatedBy = tmpXml.VaultUserName
+              .Job_UserID = tmpXml.VaultClientMachine
+              .Job_CreationDate = tmpXml.VaultSubmittedDate
+              .Job_CreationTime = tmpXml.VaultSubmittedDate
+              .DocumentID = tmpXml.number
+            End With
+            Msg("Importing: " & IO.Path.GetFileName(XmlFile), log)
             tmpXml.PDFFilePathName = IO.Path.ChangeExtension(XmlFile, "PDF")
             tmpXml.slzFileName = IO.Path.ChangeExtension(XmlFile, "slz")
             tmpXml.ERPCompany = tmpFld.ERPCompany
-            EJI.DBCommon.ERPCompany = tmpFld.ERPCompany
+            'EJI.DBCommon.ERPCompany = tmpFld.ERPCompany
             '
             'tmpXml.LibraryID = LibraryID
             'tmpXml.LibraryPath = LibraryPath
             '
-            If ERPLN.InsertUpdateInERPLN(tmpXml, AddressOf Msg) Then
+            If ERPLN.InsertUpdateInERPLN(tmpXml, log, AddressOf Msg) Then
               If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
-                Msg("Attaching: " & IO.Path.GetFileName(XmlFile))
-                ERPLN.UploadInISGECVault(tmpXml, AddressOf Msg)
-                Msg("Attaching Completed.")
+                Msg("Attaching: " & IO.Path.GetFileName(XmlFile), log)
+                ERPLN.UploadInISGECVault(tmpXml, log, AddressOf Msg)
+                Msg("Attaching Completed.", log)
               End If
             End If
             IO.File.Copy(XmlFile, tmpFld.ProcessedPath & "\" & IO.Path.GetFileName(XmlFile), True)
@@ -55,21 +84,22 @@ Public Class JobProcessor
             IO.File.Copy(tmpXml.PDFFilePathName, tmpFld.ProcessedPath & "\" & IO.Path.GetFileName(tmpXml.PDFFilePathName), True)
             IO.File.Delete(tmpXml.PDFFilePathName)
             'Create Lock XML
-            Msg("Creating Lock XML.")
+            Msg("Creating Lock XML.", log)
             Try
               CreateLockXML(tmpXml, jpConfig.LockXMLFolder)
-              Msg("Lock XML Created.")
+              Msg("Lock XML Created.", log)
+              Msg("XML Imported in BaaN: " & tmpXml.number, log)
             Catch ex As Exception
-              MsgErr("Error Lock XML : " & ex.Message)
+              MsgErr("Error Lock XML : " & ex.Message, log)
             End Try
           Catch ex As Exception
-            Msg("Error In Import: " & IO.Path.GetFileName(XmlFile))
+            Msg("Error In Import: " & IO.Path.GetFileName(XmlFile), log)
             'Send E-Mail to User
             If tmpXml.SendMailRequired Then
-              Msg("Sending E-Mail to : " & tmpXml.VaultUserName)
+              Msg("Sending E-Mail to : " & tmpXml.VaultUserName, log)
               vaultXML.SendMail(tmpXml)
             End If
-            MsgErr(IO.Path.GetFileName(XmlFile) & " : " & ex.Message)
+            MsgErr(IO.Path.GetFileName(XmlFile) & " : " & ex.Message, log)
             IO.File.Copy(XmlFile, tmpFld.ErrorPath & "\" & IO.Path.GetFileName(XmlFile), True)
             IO.File.Delete(XmlFile)
             IO.File.Copy(tmpXml.PDFFilePathName, tmpFld.ErrorPath & "\" & IO.Path.GetFileName(tmpXml.PDFFilePathName), True)
@@ -80,12 +110,12 @@ Public Class JobProcessor
           End If
         Next
         If IsStopping Then
-          Msg("Cancelled")
+          Msg("Cancelled", log)
           Exit For
         End If
       Next
     Catch ex As Exception
-      MsgErr(ex.Message)
+      MsgErr(ex.Message, log)
     End Try
   End Sub
 
@@ -221,7 +251,7 @@ Public Class JobProcessor
   Public Overrides Sub Started()
     Try
       RaiseEvent JobStarted()
-      Msg("Reading Settings")
+      Msg("Reading Settings", Nothing)
       Dim ConfigPath As String = IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) & "\Settings.xml"
       jpConfig = ConfigFile.DeSerialize(ConfigPath)
       For Each tmp As ConfigFile.Folder In jpConfig.Folders
@@ -247,7 +277,7 @@ Public Class JobProcessor
       End If
     Catch ex As Exception
       StopJob()
-      MsgErr(ex.Message)
+      MsgErr(ex.Message, Nothing)
     End Try
   End Sub
 
@@ -258,7 +288,7 @@ Public Class JobProcessor
     End If
     jpConfig = Nothing
     RaiseEvent JobStopped()
-    Msg("Stopped")
+    Msg("Stopped", Nothing)
   End Sub
 
   Public Shared Function IsFileAvailable(ByVal FilePath As String) As Boolean
