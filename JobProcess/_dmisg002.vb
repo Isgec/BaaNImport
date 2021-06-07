@@ -206,7 +206,7 @@ Namespace SIS.DMISG
         .t_docn = x.drgid
         .t_revn = x.rev
         .t_srno = SrNo
-        .t_item = (t.item_code & x.ItemSuffix).PadLeft((t.item_code & x.ItemSuffix).Length + 9, " ")
+        .t_item = (t.item_code.Trim & x.ItemSuffix).PadLeft((t.item_code.Trim & x.ItemSuffix).Length + 9, " ")
         .t_dsca = t.item_descn
         .t_citg = t.item_g
         Try
@@ -245,7 +245,7 @@ Namespace SIS.DMISG
           x.Errors.Add("Item Group " & t.item_g & " NOT Found in ERP for Item=>" & t.item_code)
           Throw New Exception("Item Group " & t.item_g & " NOT Found in ERP for Item=>" & t.item_code)
         End If
-        .t_oitm = t.item_code.PadLeft(t.item_code.Length + 9, " ")
+        .t_oitm = t.item_code.PadLeft(t.item_code.Trim.Length + 9, " ")
         .t_elem = x.el_id
         .t_Refcntd = 0
         .t_Refcntu = 0

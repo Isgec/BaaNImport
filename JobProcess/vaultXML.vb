@@ -21,7 +21,15 @@ Public Class vaultXML
     Public Property it_wt As String = ""
     Public Property item_g As String = ""
     Public Property t As String = ""
-    Public Property item_code As String = ""
+    Private _item_code As String = ""
+    Public Property item_code As String
+      Get
+        Return _item_code
+      End Get
+      Set(value As String)
+        _item_code = value.Trim
+      End Set
+    End Property
     Public Property item_descn As String = ""
 
     Public Property Parts As New List(Of Part)

@@ -72,13 +72,8 @@ Public Class JobProcessor
             'tmpXml.LibraryID = LibraryID
             'tmpXml.LibraryPath = LibraryPath
             '
-            If ERPLN.InsertUpdateInERPLN(tmpXml, log, AddressOf Msg) Then
-              If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
-                Msg("Attaching: " & IO.Path.GetFileName(XmlFile), log)
-                ERPLN.UploadInISGECVault(tmpXml, log, AddressOf Msg)
-                Msg("Attaching Completed.", log)
-              End If
-            End If
+            ERPLN.InsertUpdateInERPLN(tmpXml, log, AddressOf Msg)
+
             IO.File.Copy(XmlFile, tmpFld.ProcessedPath & "\" & IO.Path.GetFileName(XmlFile), True)
             IO.File.Delete(XmlFile)
             IO.File.Copy(tmpXml.PDFFilePathName, tmpFld.ProcessedPath & "\" & IO.Path.GetFileName(tmpXml.PDFFilePathName), True)

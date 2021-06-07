@@ -55,7 +55,9 @@ Public Class ERPLN
       Try
         '1. Insert in all 5 tables
         tmpDoc = SIS.DMISG.dmisg001.Getdmisg001(t)
+        If msg IsNot Nothing Then msg("Inserting in 001", log)
         tmpDoc = SIS.DMISG.dmisg001.InsertData(tmpDoc, t.ERPCompany)
+        If msg IsNot Nothing Then msg("Inserted in 001", log)
         '2. Item & 4 Part Item
         Dim tmpCnt As Integer = 0
         Dim refCnt As Integer = 0
@@ -78,28 +80,46 @@ Public Class ERPLN
             Case Else
               tmpCnt += 1
               Dim tmpItm As SIS.DMISG.dmisg002 = SIS.DMISG.dmisg002.Getdmisg002(itm, t, tmpCnt)
+              If msg IsNot Nothing Then msg("Inserting in 002: " & tmpItm.t_item, log)
               tmpItm = SIS.DMISG.dmisg002.InsertData(tmpItm, t.ERPCompany)
+              If msg IsNot Nothing Then msg("Inserted in 002: " & tmpItm.t_item, log)
               pItem = itm.item_code
               '3. Part Item
               For Each pItm As vaultXML.Part In itm.Parts
                 pCnt += 1
                 Dim tmpPitm As SIS.DMISG.dmisg004 = SIS.DMISG.dmisg004.Getdmisg004(pItm, t, tmpCnt, pCnt, pItem)
+                If msg IsNot Nothing Then msg("Inserting in 004:" & tmpPitm.t_prtn, log)
                 tmpPitm = SIS.DMISG.dmisg004.InsertData(tmpPitm, t.ERPCompany)
+                If msg IsNot Nothing Then msg("Inserted in 004:" & tmpPitm.t_prtn, log)
               Next
           End Select
         Next
         '4. Ref Dwg
         For Each doc As vaultXML.RefDoc In t.RefDocs
           Dim refD As SIS.DMISG.dmisg003 = SIS.DMISG.dmisg003.Getdmisg003(doc, t)
-          Try
+          'Try
+          If msg IsNot Nothing Then msg("Inserting ref dwg in 003: " & refD.t_drgn, log)
             refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
-          Catch ex As Exception
-            If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message, log)
-          End Try
+            If msg IsNot Nothing Then msg("Inserting ref dwg in 003: " & refD.t_drgn, log)
+          'Catch ex As Exception
+          '  If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message, log)
+          'End Try
         Next
         '5. Master Document List
         dmDoc = SIS.DMISG.dmisg121.Getdmisg121(t)
+        If msg IsNot Nothing Then msg("Inserting in 121", log)
         dmDoc = SIS.DMISG.dmisg121.InsertData(dmDoc, t.ERPCompany)
+        If msg IsNot Nothing Then msg("Inserted in 121", log)
+        '=====================
+        If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
+          If msg IsNot Nothing Then msg("Attaching: " & t.drgid, log)
+          '==========================
+          Threading.Thread.Sleep(5000)
+          '==========================
+          ERPLN.UploadInISGECVault(t, log, msg)
+          If msg IsNot Nothing Then msg("Attached.", log)
+        End If
+        '=====================
       Catch ex As Exception
         SIS.DMISG.dmisg001.dmisg001DeleteAll(t.drgid, t.rev, t.ERPCompany)
         t.SendMailRequired = True
@@ -171,7 +191,9 @@ Public Class ERPLN
       Try
         '1. Insert in all 5 tables
         tmpDoc = SIS.DMISG.dmisg001.Getdmisg001(t)
+        If msg IsNot Nothing Then msg("Inserting in 001", log)
         tmpDoc = SIS.DMISG.dmisg001.InsertData(tmpDoc, t.ERPCompany)
+        If msg IsNot Nothing Then msg("Inserted in 001", log)
         '2. Item & 4 Part Item
         Dim tmpCnt As Integer = 0
         Dim refCnt As Integer = 0
@@ -193,27 +215,45 @@ Public Class ERPLN
             Case Else
               tmpCnt += 1
               Dim tmpItm As SIS.DMISG.dmisg002 = SIS.DMISG.dmisg002.Getdmisg002(itm, t, tmpCnt)
+              If msg IsNot Nothing Then msg("Inserting in 002: " & tmpItm.t_item, log)
               tmpItm = SIS.DMISG.dmisg002.InsertData(tmpItm, t.ERPCompany)
+              If msg IsNot Nothing Then msg("Inserted in 002: " & tmpItm.t_item, log)
               pItem = itm.item_code
               For Each pItm As vaultXML.Part In itm.Parts
                 pCnt += 1
                 Dim tmpPitm As SIS.DMISG.dmisg004 = SIS.DMISG.dmisg004.Getdmisg004(pItm, t, tmpCnt, pCnt, pItem)
+                If msg IsNot Nothing Then msg("Inserting in 004:" & tmpPitm.t_prtn, log)
                 tmpPitm = SIS.DMISG.dmisg004.InsertData(tmpPitm, t.ERPCompany)
+                If msg IsNot Nothing Then msg("Inserted in 004:" & tmpPitm.t_prtn, log)
               Next
           End Select
         Next
         '3. Ref Dwg
         For Each doc As vaultXML.RefDoc In t.RefDocs
           Dim refD As SIS.DMISG.dmisg003 = SIS.DMISG.dmisg003.Getdmisg003(doc, t)
-          Try
+          'Try
+          If msg IsNot Nothing Then msg("Inserting ref dwg in 003: " & refD.t_drgn, log)
             refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
-          Catch ex As Exception
-            If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message, log)
-          End Try
+            If msg IsNot Nothing Then msg("Inserting ref dwg in 003: " & refD.t_drgn, log)
+          'Catch ex As Exception
+          '  If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message, log)
+          'End Try
         Next
         '5. Master Document List
         dmDoc = SIS.DMISG.dmisg121.Getdmisg121(t)
+        If msg IsNot Nothing Then msg("Inserting in 121", log)
         dmDoc = SIS.DMISG.dmisg121.InsertData(dmDoc, t.ERPCompany)
+        If msg IsNot Nothing Then msg("Inserted in 121", log)
+        '=====================
+        If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
+          If msg IsNot Nothing Then msg("Attaching: " & t.drgid, log)
+          '==========================
+          Threading.Thread.Sleep(5000)
+          '==========================
+          ERPLN.UploadInISGECVault(t, log, msg)
+          If msg IsNot Nothing Then msg("Attached.", log)
+        End If
+        '=====================
       Catch ex As Exception
         SIS.DMISG.dmisg001.dmisg001DeleteAll(t.drgid, t.rev, t.ERPCompany)
         t.SendMailRequired = True
@@ -239,13 +279,13 @@ Public Class ERPLN
       If tmp Is Nothing Then
         Found = False
         tmp = New EJI.ediAFile
-        LibFileName = EJI.ediASeries.GetNextFileID
-      Else
-        LibFileName = tmp.t_dcid
+        tmp.t_dcid = EJI.ediASeries.GetNextFileID
+        tmp.t_drid = EJI.ediASeries.GetNextRecordID
       End If
+      LibFileName = tmp.t_dcid
       With tmp
-        .t_drid = EJI.ediASeries.GetNextRecordID
-        .t_dcid = LibFileName
+        '.t_drid = EJI.ediASeries.GetNextRecordID
+        '.t_dcid = LibFileName
         .t_hndl = "DOCUMENTMASTERPDF_" & t.ERPCompany
         .t_indx = t.AttachmentIndex
         .t_prcd = "EJIMAIN"
@@ -267,9 +307,11 @@ Public Class ERPLN
       Try
         '2. Move & Overwrite File
         If IO.File.Exists(t.LibraryPath & "\" & LibFileName) Then
+          IO.File.SetAttributes(t.LibraryPath & "\" & LibFileName, IO.FileAttributes.Normal)
           IO.File.Delete(t.LibraryPath & "\" & LibFileName)
         End If
         IO.File.Copy(t.PDFFilePathName, t.LibraryPath & "\" & LibFileName)
+        IO.File.SetAttributes(t.LibraryPath & "\" & LibFileName, IO.FileAttributes.Normal)
         If msg IsNot Nothing Then
           msg.Invoke("PDF Copied: " & tmp.t_fnam, log)
         End If
@@ -277,6 +319,7 @@ Public Class ERPLN
         If msg IsNot Nothing Then
           msg.Invoke("Error Copying PDF: " & tmp.t_fnam, log)
         End If
+        Throw New Exception(ex.Message)
       End Try
     End If
     '=================================
@@ -288,13 +331,13 @@ Public Class ERPLN
       If tmp Is Nothing Then
         Found = False
         tmp = New EJI.ediAFile
-        LibFileName = EJI.ediASeries.GetNextFileID
-      Else
-        LibFileName = tmp.t_dcid
+        tmp.t_dcid = EJI.ediASeries.GetNextFileID
+        tmp.t_drid = EJI.ediASeries.GetNextRecordID
       End If
+      LibFileName = tmp.t_dcid
       With tmp
-        .t_drid = EJI.ediASeries.GetNextRecordID
-        .t_dcid = LibFileName
+        '.t_drid = EJI.ediASeries.GetNextRecordID
+        '.t_dcid = LibFileName
         .t_hndl = "DOCUMENTMASTERORG_" & t.ERPCompany
         .t_indx = t.AttachmentIndex
         .t_prcd = "EJIMAIN"
@@ -316,9 +359,11 @@ Public Class ERPLN
       Try
         '2. Move & Overwrite File
         If IO.File.Exists(t.LibraryPath & "\" & LibFileName) Then
+          IO.File.SetAttributes(t.LibraryPath & "\" & LibFileName, IO.FileAttributes.Normal)
           IO.File.Delete(t.LibraryPath & "\" & LibFileName)
         End If
         IO.File.Move(t.ORGFilePathName, t.LibraryPath & "\" & LibFileName)
+        IO.File.SetAttributes(t.LibraryPath & "\" & LibFileName, IO.FileAttributes.Normal)
         If msg IsNot Nothing Then
           msg.Invoke("ORG Copied: " & tmp.t_fnam, log)
         End If
@@ -326,6 +371,7 @@ Public Class ERPLN
         If msg IsNot Nothing Then
           msg.Invoke("Error Copying ORG: " & tmp.t_fnam, log)
         End If
+        Throw New Exception(ex.Message)
       End Try
     End If
     Return True
