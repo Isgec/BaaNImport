@@ -13,42 +13,50 @@ Public Class ERPLN
         SIS.DMISG.dmisg001.dmisg001DeleteAll(t.drgid, t.rev, t.ERPCompany)
         '===Physical File Delete only when ERP is LIVE
         If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
-          Dim tmp As EJI.ediAFile = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
-          If tmp IsNot Nothing Then
-            If t.LibraryID <> tmp.t_lbcd Then
-              Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
-              t.LibraryID = tmpL.t_lbcd
-              t.LibraryPath = tmpL.LibraryPath
-              If Not EJI.DBCommon.IsLocalISGECVault Then
-                EJI.ediALib.ConnectISGECVault(tmpL)
+          Try
+            Dim tmp As EJI.ediAFile = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
+            If tmp IsNot Nothing Then
+              If t.LibraryID <> tmp.t_lbcd Then
+                Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
+                t.LibraryID = tmpL.t_lbcd
+                t.LibraryPath = tmpL.LibraryPath
+                If Not EJI.DBCommon.IsLocalISGECVault Then
+                  EJI.ediALib.ConnectISGECVault(tmpL)
+                End If
               End If
+              Try
+                If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
+                  IO.File.SetAttributes(t.LibraryPath & "\" & tmp.t_dcid, IO.FileAttributes.Normal)
+                  IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
+                End If
+              Catch ex As Exception
+                If msg IsNot Nothing Then msg("Error Deleting File [PDF-00]: " & ex.Message, log)
+              End Try
+              EJI.ediAFile.DeleteData(tmp)
             End If
-            Try
-              If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
-                IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
+            tmp = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
+            If tmp IsNot Nothing Then
+              If t.LibraryID <> tmp.t_lbcd Then
+                Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
+                t.LibraryID = tmpL.t_lbcd
+                t.LibraryPath = tmpL.LibraryPath
+                If Not EJI.DBCommon.IsLocalISGECVault Then
+                  EJI.ediALib.ConnectISGECVault(tmpL)
+                End If
               End If
-            Catch ex As Exception
-            End Try
-            EJI.ediAFile.DeleteData(tmp)
-          End If
-          tmp = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
-          If tmp IsNot Nothing Then
-            If t.LibraryID <> tmp.t_lbcd Then
-              Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
-              t.LibraryID = tmpL.t_lbcd
-              t.LibraryPath = tmpL.LibraryPath
-              If Not EJI.DBCommon.IsLocalISGECVault Then
-                EJI.ediALib.ConnectISGECVault(tmpL)
-              End If
+              Try
+                If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
+                  IO.File.SetAttributes(t.LibraryPath & "\" & tmp.t_dcid, IO.FileAttributes.Normal)
+                  IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
+                End If
+              Catch ex As Exception
+                If msg IsNot Nothing Then msg("Error Deleting File [ORG-00]: " & ex.Message, log)
+              End Try
+              EJI.ediAFile.DeleteData(tmp)
             End If
-            Try
-              If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
-                IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
-              End If
-            Catch ex As Exception
-            End Try
-            EJI.ediAFile.DeleteData(tmp)
-          End If
+          Catch ex As Exception
+            If msg IsNot Nothing Then msg("Error Deleting File [00]: " & ex.Message, log)
+          End Try
         End If
         '===Physical File Handling
       End If
@@ -99,8 +107,8 @@ Public Class ERPLN
           Dim refD As SIS.DMISG.dmisg003 = SIS.DMISG.dmisg003.Getdmisg003(doc, t)
           'Try
           If msg IsNot Nothing Then msg("Inserting ref dwg in 003: " & refD.t_drgn, log)
-            refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
-            If msg IsNot Nothing Then msg("Inserting ref dwg in 003: " & refD.t_drgn, log)
+          refD = SIS.DMISG.dmisg003.InsertData(refD, t.ERPCompany)
+          If msg IsNot Nothing Then msg("Inserting ref dwg in 003: " & refD.t_drgn, log)
           'Catch ex As Exception
           '  If msg IsNot Nothing Then msg(refD.t_drgt & ": " & ex.Message, log)
           'End Try
@@ -125,7 +133,9 @@ Public Class ERPLN
         t.SendMailRequired = True
         Throw New Exception(ex.Message)
       End Try
-    Else
+      '==========
+    Else 'Rev x00
+      '==========
       Dim tmpDoc As SIS.DMISG.dmisg001 = SIS.DMISG.dmisg001.dmisg001GetByID(t.drgid, t.rev, t.ERPCompany)
       If tmpDoc Is Nothing Then
         Dim p_rev As String = Convert.ToString(Convert.ToInt32(t.rev) - 1).PadLeft(2, "0")
@@ -155,36 +165,50 @@ Public Class ERPLN
         SIS.DMISG.dmisg001.dmisg001DeleteAll(t.drgid, t.rev, t.ERPCompany)
         '==========Physical File Delete When ERP is Live Handling============
         If SIS.SYS.SQLDatabase.DBCommon.BaaNLive Then
-          Dim tmp As EJI.ediAFile = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
-          If tmp IsNot Nothing Then
-            If t.LibraryID <> tmp.t_lbcd Then
-              Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
-              t.LibraryID = tmpL.t_lbcd
-              t.LibraryPath = tmpL.LibraryPath
-              If Not EJI.DBCommon.IsLocalISGECVault Then
-                EJI.ediALib.ConnectISGECVault(tmpL)
+          Try
+            Dim tmp As EJI.ediAFile = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERPDF_" & t.ERPCompany, t.AttachmentIndex)
+            If tmp IsNot Nothing Then
+              If t.LibraryID <> tmp.t_lbcd Then
+                Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
+                t.LibraryID = tmpL.t_lbcd
+                t.LibraryPath = tmpL.LibraryPath
+                If Not EJI.DBCommon.IsLocalISGECVault Then
+                  EJI.ediALib.ConnectISGECVault(tmpL)
+                End If
               End If
+              Try
+                If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
+                  IO.File.SetAttributes(t.LibraryPath & "\" & tmp.t_dcid, IO.FileAttributes.Normal)
+                  IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
+                End If
+              Catch ex As Exception
+                If msg IsNot Nothing Then msg("Error Deleting File [PDF-x00]: " & ex.Message, log)
+              End Try
+              EJI.ediAFile.DeleteData(tmp)
             End If
-            If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
-              IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
-            End If
-            EJI.ediAFile.DeleteData(tmp)
-          End If
-          tmp = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
-          If tmp IsNot Nothing Then
-            If t.LibraryID <> tmp.t_lbcd Then
-              Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
-              t.LibraryID = tmpL.t_lbcd
-              t.LibraryPath = tmpL.LibraryPath
-              If Not EJI.DBCommon.IsLocalISGECVault Then
-                EJI.ediALib.ConnectISGECVault(tmpL)
+            tmp = EJI.ediAFile.GetFileByHandleIndex("DOCUMENTMASTERORG_" & t.ERPCompany, t.AttachmentIndex)
+            If tmp IsNot Nothing Then
+              If t.LibraryID <> tmp.t_lbcd Then
+                Dim tmpL As EJI.ediALib = EJI.ediALib.GetLibraryByID(tmp.t_lbcd)
+                t.LibraryID = tmpL.t_lbcd
+                t.LibraryPath = tmpL.LibraryPath
+                If Not EJI.DBCommon.IsLocalISGECVault Then
+                  EJI.ediALib.ConnectISGECVault(tmpL)
+                End If
               End If
+              Try
+                If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
+                  IO.File.SetAttributes(t.LibraryPath & "\" & tmp.t_dcid, IO.FileAttributes.Normal)
+                  IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
+                End If
+              Catch ex As Exception
+                If msg IsNot Nothing Then msg("Error Deleting File [ORG-x00]: " & ex.Message, log)
+              End Try
+              EJI.ediAFile.DeleteData(tmp)
             End If
-            If IO.File.Exists(t.LibraryPath & "\" & tmp.t_dcid) Then
-              IO.File.Delete(t.LibraryPath & "\" & tmp.t_dcid)
-            End If
-            EJI.ediAFile.DeleteData(tmp)
-          End If
+          Catch ex As Exception
+            If msg IsNot Nothing Then msg("Error Deleting File [x00]: " & ex.Message, log)
+          End Try
         End If
         '================Physical File Handling==========================
       End If
